@@ -88,7 +88,7 @@ export default async function ProductPage({
                   توضیحات محصول
                 </h2>
 
-                <p className="text-base leading-9 text-slate-600">
+                <p className="whitespace-pre-line text-base leading-9 text-slate-600">
                   {product.description}
                 </p>
               </div>
