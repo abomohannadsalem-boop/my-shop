@@ -1,209 +1,56 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+
+  const [{ data: products }, { data: categories }] = await Promise.all([
+    supabase.from("products").select("*").order("created_at", { ascending: false }).limit(8),
+    supabase.from("categories").select("id,name,slug").order("name"),
+  ]);
+
   return (
-    <div>
-
-      {/* Hero */}
+    <main dir="rtl">
       <section className="bg-blue-700 text-white">
-
-        <div className="mx-auto max-w-7xl px-6 py-24 text-center">
-
-          <h1 className="text-4xl font-bold md:text-6xl">
-            به فروشگاه ما خوش آمدید
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-blue-100">
-            محصولات، کاتالوگ‌ها و محتوای آموزشی مورد نیاز خود را اینجا پیدا کنید.
-          </p>
-
-          <div className="mt-8 flex justify-center gap-4">
-
-            <Link
-              href="/products"
-              className="rounded-lg bg-white px-7 py-3 font-semibold text-blue-700 transition hover:bg-gray-100"
-            >
-              مشاهده محصولات
-            </Link>
-
-            <Link
-              href="/catalogs"
-              className="rounded-lg border border-white px-7 py-3 font-semibold transition hover:bg-blue-600"
-            >
-              کاتالوگ‌ها
-            </Link>
-
-          </div>
-
+        <div className="mx-auto max-w-7xl px-6 py-20 text-center">
+          <h1 className="text-4xl font-bold md:text-6xl">به فروشگاه ما خوش آمدید</h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-blue-100">محصول مورد نیاز خود را از بین دسته‌بندی‌های مختلف پیدا کنید.</p>
+          <Link href="/products" className="mt-8 inline-block rounded-lg bg-white px-7 py-3 font-semibold text-blue-700 transition hover:bg-gray-100">مشاهده همه محصولات</Link>
         </div>
-
       </section>
 
-
-      {/* Products */}
-      <section className="mx-auto max-w-7xl px-6 py-16">
-
-        <h2 className="text-center text-3xl font-bold">
-          محصولات
-        </h2>
-
-        <p className="mt-3 text-center text-gray-500">
-          جدیدترین محصولات فروشگاه
-        </p>
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-
-          {[
-            "محصول شماره ۱",
-            "محصول شماره ۲",
-            "محصول شماره ۳",
-            "محصول شماره ۴",
-          ].map((product) => (
-
-            <div
-              key={product}
-              className="rounded-xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-            >
-
-              <div className="mb-5 flex h-40 items-center justify-center rounded-lg bg-gray-200 text-gray-500">
-                تصویر محصول
-              </div>
-
-              <h3 className="text-lg font-bold">
-                {product}
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                توضیح کوتاه درباره محصول
-              </p>
-
-              <Link
-                href="/products"
-                className="mt-5 block w-full rounded-lg bg-blue-600 py-2 text-center text-white transition hover:bg-blue-700"
-              >
-                مشاهده محصولات
-              </Link>
-
-            </div>
-
+      <section className="mx-auto max-w-7xl px-6 py-14">
+        <div className="flex items-end justify-between gap-4">
+          <div><h2 className="text-3xl font-bold">دسته‌بندی محصولات</h2><p className="mt-2 text-gray-500">برای مشاهده محصولات هر دسته انتخاب کنید.</p></div>
+          <Link href="/products" className="text-blue-600 hover:text-blue-800">همه محصولات ←</Link>
+        </div>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {(categories ?? []).map((category: any) => (
+            <Link key={category.id} href={`/products?category=${encodeURIComponent(category.slug)}`} className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-blue-50 text-2xl">🛍️</div>
+              <h3 className="mt-5 text-xl font-bold">{category.name}</h3>
+              <p className="mt-2 text-sm text-gray-500">مشاهده محصولات این دسته</p>
+            </Link>
           ))}
-
+          {(!categories || categories.length === 0) && <Link href="/products" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow-lg"><h3 className="text-xl font-bold">همه محصولات</h3><p className="mt-2 text-sm text-gray-500">ابتدا دسته‌بندی‌ها را در Supabase اضافه کنید.</p></Link>}
         </div>
-
       </section>
 
-
-      {/* Catalogs */}
-      <section className="bg-white py-16">
-
+      <section className="bg-gray-50 py-14">
         <div className="mx-auto max-w-7xl px-6">
-
-          <h2 className="text-center text-3xl font-bold">
-            کاتالوگ‌ها
-          </h2>
-
-          <p className="mt-3 text-center text-gray-500">
-            کاتالوگ‌ها و فایل‌های فنی محصولات
-          </p>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-
-            {[
-              "کاتالوگ محصولات",
-              "راهنمای محصولات",
-              "کاتالوگ فنی",
-            ].map((catalog) => (
-
-              <div
-                key={catalog}
-                className="rounded-xl border bg-gray-50 p-6"
-              >
-
-                <div className="text-5xl">
-                  📕
+          <div className="flex items-end justify-between gap-4"><div><h2 className="text-3xl font-bold">محصولات جدید</h2><p className="mt-2 text-gray-500">آخرین محصولات فروشگاه</p></div><Link href="/products" className="text-blue-600 hover:text-blue-800">مشاهده همه ←</Link></div>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {(products ?? []).map((product: any) => (
+              <Link key={product.id} href={`/products/${product.id}`} className="overflow-hidden rounded-xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex h-48 items-center justify-center bg-gray-100">
+                  {product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <span className="text-gray-400">تصویر محصول</span>}
                 </div>
-
-                <h3 className="mt-4 text-xl font-bold">
-                  {catalog}
-                </h3>
-
-                <p className="mt-2 text-sm text-gray-500">
-                  مشاهده اطلاعات و مشخصات فنی
-                </p>
-
-                <Link
-                  href="/catalogs"
-                  className="mt-5 inline-block rounded-lg bg-gray-900 px-5 py-2 text-white transition hover:bg-gray-800"
-                >
-                  مشاهده کاتالوگ‌ها
-                </Link>
-
-              </div>
-
+                <div className="p-5"><h3 className="text-lg font-bold">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm text-gray-500">{product.description}</p><p className="mt-4 font-bold text-blue-600">{Number(product.price).toLocaleString("fa-IR")} تومان</p></div>
+              </Link>
             ))}
-
           </div>
-
         </div>
-
       </section>
-
-
-      {/* Videos */}
-      <section className="mx-auto max-w-7xl px-6 py-16">
-
-        <h2 className="text-center text-3xl font-bold">
-          ویدیوهای آموزشی
-        </h2>
-
-        <p className="mt-3 text-center text-gray-500">
-          آموزش‌های تخصصی و کاربردی
-        </p>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-
-          {[
-            "آموزش اول",
-            "آموزش دوم",
-            "آموزش سوم",
-          ].map((video) => (
-
-            <div
-              key={video}
-              className="overflow-hidden rounded-xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-            >
-
-              <div className="flex h-48 items-center justify-center bg-gray-800 text-5xl text-white">
-                ▶
-              </div>
-
-              <div className="p-5">
-
-                <h3 className="text-lg font-bold">
-                  {video}
-                </h3>
-
-                <p className="mt-2 text-sm text-gray-500">
-                  توضیح کوتاهی درباره این ویدیو
-                </p>
-
-                <Link
-                  href="/videos"
-                  className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
-                >
-                  مشاهده ویدیو
-                </Link>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </section>
-
-    </div>
+    </main>
   );
 }
