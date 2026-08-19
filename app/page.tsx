@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import SoldOutBadge from "@/app/components/SoldOutBadge";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -26,10 +27,11 @@ export default async function Home() {
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {(products ?? []).map((product: any) => (
               <Link key={product.id} href={`/products/${product.id}`} className="overflow-hidden rounded-xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                <div className="flex h-48 items-center justify-center bg-gray-100">
+                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gray-100">
                   {product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <span className="text-gray-400">تصویر محصول</span>}
+                  {product.in_stock === false && <SoldOutBadge />}
                 </div>
-                <div className="p-5"><h3 className="text-lg font-bold">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm text-gray-500">{product.description}</p><p className="mt-4 font-bold text-blue-600">{Number(product.price).toLocaleString("fa-IR")} تومان</p></div>
+                <div className="p-5"><h3 className="text-lg font-bold">{product.name}</h3><p className="mt-1 text-xs text-gray-400" dir="ltr">کد محصول: #{String(product.id).padStart(4, "0")}</p><p className="mt-4 font-bold text-blue-600">{Number(product.price).toLocaleString("fa-IR")} تومان</p></div>
               </Link>
             ))}
           </div>

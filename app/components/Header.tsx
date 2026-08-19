@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,6 +18,16 @@ export default function Header({ categories }: HeaderProps) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCategories, setShowCategories] = useState(false);
+  const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function openCategories() {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    setShowCategories(true);
+  }
+
+  function closeCategoriesWithDelay() {
+    closeTimeout.current = setTimeout(() => setShowCategories(false), 250);
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -36,6 +46,12 @@ export default function Header({ categories }: HeaderProps) {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    };
+  }, []);
+
   async function handleLogout() {
     await createClient().auth.signOut();
     window.location.href = "/";
@@ -45,13 +61,28 @@ export default function Header({ categories }: HeaderProps) {
     <header className="border-b bg-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-        {/* لوگو */}
-        <Link
-          href="/"
-          className="text-2xl font-bold text-blue-700"
-        >
-          فروشگاه من
-        </Link>
+        {/* لوگو + جستجو */}
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-2xl font-bold text-blue-700"
+          >
+            فروشگاه من
+          </Link>
+
+          <form
+            action="/products"
+            method="GET"
+            className="hidden w-64 md:block"
+          >
+            <input
+              type="text"
+              name="q"
+              placeholder="جستجوی محصول..."
+              className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </form>
+        </div>
 
         {/* منوی اصلی */}
         <nav className="hidden items-center gap-8 md:flex">
@@ -73,8 +104,8 @@ export default function Header({ categories }: HeaderProps) {
           {/* دسته‌بندی‌ها */}
           <div
             className="relative"
-            onMouseEnter={() => setShowCategories(true)}
-            onMouseLeave={() => setShowCategories(false)}
+            onMouseEnter={openCategories}
+            onMouseLeave={closeCategoriesWithDelay}
           >
             <button
               type="button"
@@ -85,7 +116,8 @@ export default function Header({ categories }: HeaderProps) {
             </button>
 
             {showCategories && (
-              <div className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border bg-white p-2 shadow-xl">
+              <div className="absolute right-0 top-full z-50 pt-3 w-64">
+              <div className="rounded-xl border bg-white p-2 shadow-xl">
 
                 {/* همه محصولات */}
                 <Link
@@ -114,6 +146,7 @@ export default function Header({ categories }: HeaderProps) {
                     دسته‌بندی‌ای وجود ندارد
                   </div>
                 )}
+              </div>
               </div>
             )}
           </div>
