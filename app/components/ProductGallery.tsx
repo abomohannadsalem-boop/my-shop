@@ -14,9 +14,9 @@ export default function ProductGallery({
   soldOut = false,
 }: ProductGalleryProps) {
   const images = imageUrl
-    .split(/[|,\n]+/)
-    .map((url) => url.trim())
-    .filter(Boolean);
+  .split("|||||")
+  .map((url) => url.trim())
+  .filter(Boolean);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 

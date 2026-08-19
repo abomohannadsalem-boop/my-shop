@@ -40,10 +40,9 @@ export default async function ProductPage({
     ? String(product.image_url)
     : "";
 
-  const primaryImage = imageUrl
-    .split(/[|,\n]+/)[0]
-    .trim();
-
+    const primaryImage = imageUrl
+      .split("|||||")[0]
+      .trim();
   return (
     <main
       dir="rtl"
